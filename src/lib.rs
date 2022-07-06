@@ -6,6 +6,8 @@ pub mod frame;
 mod frame_types;
 /// [nom] parsers for internal usage.
 mod parsers;
+/// [cookie_factory] generators for internal usage.
+mod generators;
 /// All traits used or provided by this library.
 mod traits;
 
