@@ -52,7 +52,7 @@ impl TryFrom<SupportedRate> for f32 {
             0x48 => Ok(36.0),
             0x60 => Ok(48.0),
             0x6c => Ok(54.0),
-            _ => Err(Error::Failure("Unknown supported rate value!".to_string(), vec![value.0])),
+            _ => Err(Error::ParseFailure("Unknown supported rate value!".to_string(), vec![value.0])),
         }
     }
 }

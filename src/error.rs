@@ -13,7 +13,7 @@ pub enum Error {
     #[error("This frame subtype isn't handled yet: {:?} ({:?})", .0.frame_subtype, .0.frame_type)]
     UnhandledFrameSubtype(FrameControl, Vec<u8>),
     #[error("A parsing failure occurred: \n{}\ndata: {:?}", .0, .1)]
-    Failure(String, Vec<u8>),
+    ParseFailure(String, Vec<u8>),
     #[error("A serializing faliure occurred: \n{}", .0)]
     SerializeFailure(String),
     #[error("There wasn't enough data. {}", .0)]
@@ -36,14 +36,14 @@ impl From<nom::Err<nom::error::Error<&[u8]>>> for Error {
                 }
                 Needed::Unknown => Error::Incomplete(String::new()),
             },
-            nom::Err::Failure(error) => Error::Failure(
+            nom::Err::Failure(error) => Error::ParseFailure(
                 format!(
                     "An error occured while parsing the data: nom::ErrorKind is {:?}",
                     error.code
                 ),
                 error.input.to_vec(),
             ),
-            nom::Err::Error(error) => Error::Failure(
+            nom::Err::Error(error) => Error::ParseFailure(
                 format!(
                     "An error occured while parsing the data: nom::ErrorKind is {:?}",
                     error.code

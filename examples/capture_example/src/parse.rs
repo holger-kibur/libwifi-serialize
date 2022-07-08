@@ -23,7 +23,7 @@ pub fn handle_packet(packet: Packet) -> Result<()> {
         Err(err) => {
             println!("Error during parsing :\n{}", err);
             match err {
-                libwifi::error::Error::Failure(_, data) => println!("{:?}", data),
+                libwifi::error::Error::ParseFailure(_, data) => println!("{:?}", data),
                 _ => (),
             }
         }

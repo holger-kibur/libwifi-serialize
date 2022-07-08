@@ -5,6 +5,9 @@ use crate::generators::{GenCursor, GenResult};
 
 /// Readability macro to panic with a helpful message in case of an illegal
 /// frame subtype.
+/// 
+/// FIXME: Remove this and replace with graceful error handling using Result.
+/// Why the fuck did you even do this in the first place Holger jeeez....
 macro_rules! illegal_subtype {
     ($subtype:ident) => {
         match $subtype {
