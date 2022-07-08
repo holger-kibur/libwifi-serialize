@@ -1,7 +1,7 @@
-use cookie_factory::{do_gen, gen_le_u8, GenError};
+use cookie_factory::{do_gen, gen_le_u8};
 
 use crate::{frame::components::FrameControl, FrameType, FrameSubType};
-use super::super::GenCursor;
+use crate::generators::{GenCursor, GenResult};
 
 /// Readability macro to panic with a helpful message in case of an illegal
 /// frame subtype.
@@ -16,7 +16,7 @@ macro_rules! illegal_subtype {
 }
 
 /// Serializer for the two byte [FrameControl] header common to all 802.11 frames.
-pub fn gen_frame_control<'a>(cursor: GenCursor<'a>, frame_ctrl: &FrameControl) -> Result<GenCursor<'a>, GenError> {
+pub fn gen_frame_control<'a>(cursor: GenCursor<'a>, frame_ctrl: &FrameControl) -> GenResult<'a> {
     // Compose first byte of frame control header
     let ser_frame_type = gen_frame_type(frame_ctrl.frame_type);
     let ser_frame_subtype = match frame_ctrl.frame_type {

@@ -25,7 +25,8 @@ nom = "7"
 thiserror = "1.0"
 strum_macros = "0.24"
 enum_dispatch = "0.3"
-cookie-factory = "0.3.2"
+cookie-factory = "0.3"
+num_enum = "0.5"
 
 libwifi_macros = { version="0.0.2", path="libwifi_macros" }
 
@@ -33,6 +34,7 @@ libwifi_macros = { version="0.0.2", path="libwifi_macros" }
 criterion = "0.3"
 doc-comment = "0.3"
 rand = "0.8"
+pretty-hex = "0.3"
 
 [[bench]]
 name = "parse_beacon"

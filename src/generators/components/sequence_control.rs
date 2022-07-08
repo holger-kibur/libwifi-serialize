@@ -1,8 +1,8 @@
-use cookie_factory::{GenError, do_gen, gen_le_u8};
+use cookie_factory::{do_gen, gen_le_u8};
 
-use crate::{generators::GenCursor, frame::components::SequenceControl};
+use crate::{generators::{GenCursor, GenResult}, frame::components::SequenceControl};
 
-pub fn gen_sequence_ctrl<'a>(cursor: GenCursor<'a>, seq_ctrl: &SequenceControl) -> Result<GenCursor<'a>, GenError> {
+pub fn gen_sequence_ctrl<'a>(cursor: GenCursor<'a>, seq_ctrl: &SequenceControl) -> GenResult<'a> {
     // 4 bit fragment number + upper 4 bits of sequence number
     let seq_ctrl_byte_1 = (seq_ctrl.fragment_number << 4) | ((seq_ctrl.sequence_number >> 8) as u8 & 0x0F);
     // Lower 8 bits of sequence number

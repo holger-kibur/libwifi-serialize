@@ -13,6 +13,7 @@ mod traits;
 
 use crate::error::Error;
 use crate::parsers::*;
+use crate::generators::*;
 
 // Re-exports for user convenience
 pub use crate::frame::Frame;
@@ -52,6 +53,21 @@ pub fn parse_frame(input: &[u8]) -> Result<Frame, Error> {
         FrameSubType::QosData => parse_qos_data(frame_control, input),
         FrameSubType::QosNull => parse_qos_null(frame_control, input),
         _ => Err(Error::UnhandledFrameSubtype(frame_control, input.to_vec())),
+    }
+}
+
+pub fn serialize_frame(buffer: &mut [u8], frame: &Frame) -> Result<usize, Error> {
+    let initial_cursor: GenCursor = (buffer, 0);
+    
+    let final_result = match frame {
+        Frame::Beacon(beacon) => gen_beacon(initial_cursor, beacon),
+        _ => return Err(Error::Incomplete("Hasn't been implemented yet!".to_string())),
+    };
+
+    if let Ok(final_cursor) = final_result {
+        Ok(final_cursor.1)
+    } else {
+        Err(final_result.unwrap_err().into())
     }
 }
 

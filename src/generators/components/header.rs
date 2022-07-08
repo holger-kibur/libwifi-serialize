@@ -1,10 +1,10 @@
-use cookie_factory::{GenError, do_gen, gen_call, gen_slice, gen_cond};
+use cookie_factory::{do_gen, gen_call, gen_slice, gen_cond};
 
-use crate::{generators::GenCursor, frame::components::{ManagementHeader, DataHeader}};
+use crate::{generators::{GenCursor, GenResult}, frame::components::{ManagementHeader, DataHeader}};
 
 use super::{frame_control::gen_frame_control, sequence_control::gen_sequence_ctrl};
 
-pub fn gen_management_header<'a>(cursor: GenCursor<'a>, mgmt_header: &ManagementHeader) -> Result<GenCursor<'a>, GenError> {
+pub fn gen_mgmt_header<'a>(cursor: GenCursor<'a>, mgmt_header: &ManagementHeader) -> GenResult<'a> {
     do_gen!(cursor, 
         gen_frame_control(&mgmt_header.frame_control)
         >> gen_slice!(&mgmt_header.duration)
@@ -14,7 +14,7 @@ pub fn gen_management_header<'a>(cursor: GenCursor<'a>, mgmt_header: &Management
         >> gen_sequence_ctrl(&mgmt_header.sequence_control))
 }
 
-pub fn gen_data_header<'a>(cursor: GenCursor<'a>, data_header: &DataHeader) -> Result<GenCursor<'a>, GenError> {
+pub fn gen_data_header<'a>(cursor: GenCursor<'a>, data_header: &DataHeader) -> GenResult<'a> {
     do_gen!(cursor,
         gen_frame_control(&data_header.frame_control)
         >> gen_slice!(&data_header.duration)

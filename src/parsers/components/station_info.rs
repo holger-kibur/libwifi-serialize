@@ -3,7 +3,7 @@ use nom::number::complete::u8 as get_u8;
 use nom::sequence::tuple;
 use nom::IResult;
 
-use crate::frame::components::StationInfo;
+use crate::frame::components::{StationInfo, SupportedRate, ManagementInfoId};
 
 /// Parse variable length and variable field information.
 /// The general structure of the data looks like this:
@@ -28,18 +28,20 @@ pub fn parse_station_info(mut input: &[u8]) -> IResult<&[u8], StationInfo> {
         (input, data) = take(length)(input)?;
         //println!("Extracted data: {:?}", data);
 
-        match element_id {
-            0 => {
-                let mut ssid = String::from_utf8_lossy(data).to_string();
-                // Remove null chars. Some APs seem to enjoy sending those.
-                ssid = ssid.replace('\0', " ");
-                station_info.ssid = Some(ssid);
+        if let Ok(element) = ManagementInfoId::try_from(element_id) {
+            match element {
+                ManagementInfoId::SSID => {
+                    let mut ssid = String::from_utf8_lossy(data).to_string();
+                    // Remove null chars. Some APs seem to enjoy sending those.
+                    ssid = ssid.replace('\0', " ");
+                    station_info.ssid = Some(ssid);
+                },
+                ManagementInfoId::SupportedRates => station_info.supported_rates = data.iter().map(|rate| SupportedRate(*rate)).collect(),
+                _ => {
+                    station_info.data.push((element, data.to_vec()));
+                }
             }
-            1 => station_info.supported_rates = parse_supported_rates(data),
-            _ => {
-                station_info.data.push((element_id, data.to_vec()));
-            }
-        };
+        } // TODO: Put some kind of opt-in warning here?
 
         if input.len() <= 4 {
             break;
@@ -47,31 +49,4 @@ pub fn parse_station_info(mut input: &[u8]) -> IResult<&[u8], StationInfo> {
     }
 
     Ok((input, station_info))
-}
-
-/// This is used in the ProbeResponse frame.
-/// It indicates which transmission rates (in Mbps) are supported by this AP.
-fn parse_supported_rates(input: &[u8]) -> Vec<f32> {
-    let mut rates: Vec<f32> = Vec::new();
-    for rate in input {
-        match rate {
-            0x82 => rates.push(1.0),
-            0x84 => rates.push(2.0),
-            0x8b => rates.push(5.5),
-            0x0c => rates.push(6.0),
-            0x12 => rates.push(9.0),
-            0x96 => rates.push(11.0),
-            0x18 => rates.push(12.0),
-            0x24 => rates.push(18.0),
-            0x2c => rates.push(22.0),
-            0x30 => rates.push(24.0),
-            0x42 => rates.push(33.0),
-            0x48 => rates.push(36.0),
-            0x60 => rates.push(48.0),
-            0x6c => rates.push(54.0),
-            _ => continue,
-        }
-    }
-
-    rates
 }
