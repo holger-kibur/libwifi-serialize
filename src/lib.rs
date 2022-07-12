@@ -4,16 +4,16 @@ pub mod error;
 pub mod frame;
 /// Enums representing frame types and frame subtypes.
 mod frame_types;
-/// [nom] parsers for internal usage.
-mod parsers;
 /// [cookie_factory] generators for internal usage.
 mod generators;
+/// [nom] parsers for internal usage.
+mod parsers;
 /// All traits used or provided by this library.
 mod traits;
 
 use crate::error::Error;
-use crate::parsers::*;
 use crate::generators::*;
+use crate::parsers::*;
 
 // Re-exports for user convenience
 pub use crate::frame::Frame;
@@ -58,10 +58,14 @@ pub fn parse_frame(input: &[u8]) -> Result<Frame, Error> {
 
 pub fn serialize_frame(buffer: &mut [u8], frame: &Frame) -> Result<usize, Error> {
     let initial_cursor: GenCursor = (buffer, 0);
-    
+
     let final_result = match frame {
         Frame::Beacon(beacon) => gen_beacon(initial_cursor, beacon),
-        _ => return Err(Error::Incomplete("Hasn't been implemented yet!".to_string())),
+        _ => {
+            return Err(Error::Incomplete(
+                "Hasn't been implemented yet!".to_string(),
+            ))
+        }
     };
 
     if let Ok(final_cursor) = final_result {

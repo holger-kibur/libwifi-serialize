@@ -57,25 +57,26 @@ impl From<nom::Err<nom::error::Error<&[u8]>>> for Error {
 impl From<cookie_factory::GenError> for Error {
     fn from(error: cookie_factory::GenError) -> Self {
         match error {
-            cookie_factory::GenError::BufferTooSmall(max_idx) => Error::SerializeFailure(
-                format!("Provided buffer is too small! Minimum size is {}!", max_idx + 1)
-            ),
+            cookie_factory::GenError::BufferTooSmall(max_idx) => Error::SerializeFailure(format!(
+                "Provided buffer is too small! Minimum size is {}!",
+                max_idx + 1
+            )),
             cookie_factory::GenError::CustomError(error_code) => {
                 if let Ok(error) = SerializationError::try_from(error_code) {
-                    Error::SerializeFailure(error.explain().to_owned())
+                    Error::SerializeFailure(error.to_string())
                 } else {
                     panic!("Unknown GenError::CustomError code! Are you using SerializationError.into()?");
                 }
-            },
-            cookie_factory::GenError::InvalidOffset => Error::SerializeFailure(
-                "Generator asked for inavlid index!".to_owned()
-            ),
-            cookie_factory::GenError::IoError(error) => Error::SerializeFailure(
-                format!("Generator IO Error:\n{:?}", error)
-            ),
-            cookie_factory::GenError::NotYetImplemented => Error::SerializeFailure(
-                "Generator not yet implemented!".to_owned(),
-            ),
+            }
+            cookie_factory::GenError::InvalidOffset => {
+                Error::SerializeFailure("Generator asked for inavlid index!".to_owned())
+            }
+            cookie_factory::GenError::IoError(error) => {
+                Error::SerializeFailure(format!("Generator IO Error:\n{:?}", error))
+            }
+            cookie_factory::GenError::NotYetImplemented => {
+                Error::SerializeFailure("Generator not yet implemented!".to_owned())
+            }
             // This should have been caught earlier.
             cookie_factory::GenError::BufferTooBig(_) => unreachable!(),
         }

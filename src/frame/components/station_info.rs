@@ -1,4 +1,4 @@
-use num_enum::{TryFromPrimitive, IntoPrimitive};
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::error::Error;
 
@@ -32,28 +32,64 @@ pub struct StationInfo {
 #[derive(Clone, Debug, Default)]
 pub struct SupportedRate(pub u8);
 
-impl TryFrom<SupportedRate> for f32 {
+impl TryFrom<SupportedRate> for u32 {
     type Error = Error;
 
-    /// Supported rate in Mbps.
+    /// Supported rate in Kbps.
     fn try_from(value: SupportedRate) -> Result<Self, Self::Error> {
         match value.0 {
-            0x82 => Ok(1.0),
-            0x84 => Ok(2.0),
-            0x8b => Ok(5.5),
-            0x0c => Ok(6.0),
-            0x12 => Ok(9.0),
-            0x96 => Ok(11.0),
-            0x18 => Ok(12.0),
-            0x24 => Ok(18.0),
-            0x2c => Ok(22.0),
-            0x30 => Ok(24.0),
-            0x42 => Ok(33.0),
-            0x48 => Ok(36.0),
-            0x60 => Ok(48.0),
-            0x6c => Ok(54.0),
-            _ => Err(Error::ParseFailure("Unknown supported rate value!".to_string(), vec![value.0])),
+            0x82 => Ok(1000),
+            0x84 => Ok(2000),
+            0x8b => Ok(5500),
+            0x0c => Ok(6000),
+            0x12 => Ok(9000),
+            0x96 => Ok(11000),
+            0x18 => Ok(12000),
+            0x24 => Ok(18000),
+            0x2c => Ok(22000),
+            0x30 => Ok(24000),
+            0x42 => Ok(33000),
+            0x48 => Ok(36000),
+            0x60 => Ok(48000),
+            0x6c => Ok(54000),
+            _ => Err(Error::ParseFailure(
+                "Unknown supported rate value!".to_string(),
+                vec![value.0],
+            )),
         }
+    }
+}
+
+impl TryFrom<u32> for SupportedRate {
+    type Error = Error;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        let rate = match value {
+            1000 => Some(0x82),
+            2000 => Some(0x84),
+            5500 => Some(0x8b),
+            6000 => Some(0x0c),
+            9000 => Some(0x12),
+            11000 => Some(0x96),
+            12000 => Some(0x18),
+            18000 => Some(0x24),
+            22000 => Some(0x2c),
+            24000 => Some(0x30),
+            33000 => Some(0x42),
+            36000 => Some(0x48),
+            48000 => Some(0x60),
+            54000 => Some(0x6c),
+            _ => None,
+        };
+        rate.map_or_else(
+            || {
+                Err(Error::SerializeFailure(format!(
+                    "Can't be an 802.11 supported rate: {} Mbps!",
+                    value
+                )))
+            },
+            |x| Ok(SupportedRate(x)),
+        )
     }
 }
 
@@ -61,13 +97,18 @@ impl TryFrom<SupportedRate> for f32 {
 #[repr(u8)]
 /// Management Frame Information Element IDs for tagged data in management frame
 /// headers.
-/// 
-/// Reference: 802.11 Wireless Networks The Definitive Guide, Chapter 4 Table 7
-/// 
-/// There are some peculiarities with referenced table, namely elements with IDs
-/// that fall within reserved ranges. I'm not sure what the deal with that is. I
-/// assume that the element IDs are correct, and the reserved ranges are
-/// interrupted, which is why this enum doesn't exactly match the table.
+///
+/// References:
+///  - 802.11 Wireless Networks The Definitive Guide, Chapter 4 Table 7
+///  - Wireshark
+///
+/// This table is an amalgamation of the table from the book, and info field
+/// types from wireshark. Wireshark doesn't seem to maintain an internal wiki
+/// page on the meanings of all these fields, and I don't care enough to crawl
+/// through the source to find them, so this table is updated opportunistically.
+///
+/// Please update this table with new info element id types which you find in
+/// the wild.
 pub enum ManagementInfoId {
     SSID = 0,
     SupportedRates,
@@ -80,9 +121,10 @@ pub enum ManagementInfoId {
     HoppingPatternParams,
     HoppingPatternTable,
     Request,
-    // 11-15 reserved
+    ObssLoadElement,
+    // 12-15 unknown
     ChallengeText = 16,
-    // 17-31 reserved
+    // 17-31 unknown
     PowerConstraint = 32,
     PowerCapability,
     TpcRequest,
@@ -94,11 +136,20 @@ pub enum ManagementInfoId {
     Quiet,
     IbssDfs,
     ErpInfo,
-    // 43-47 reserved
+    // 43-44 unknown
+    HtCapability = 45,
+    // 46-47 unknown
     RobustSecurityNetwork = 48,
-    // 49 reserved
+    // 49 unknown
     ExtSupportedRates = 50,
-    // 51-220 reserved
-    WPA = 221,
-    // 222-255 reserved
+    // 51-60 unknown
+    HtInfo = 61,
+    // 62-69 unknown
+    RmEnabledCapability = 70,
+    // 71-73 unknown
+    BssOverlapParams = 74,
+    // 75-220 unknown
+    VendorSpecific = 221,
+    // 222-254 unknown
+    InfoIdExtension = 255,
 }

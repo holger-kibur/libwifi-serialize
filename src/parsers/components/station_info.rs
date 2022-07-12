@@ -3,7 +3,7 @@ use nom::number::complete::u8 as get_u8;
 use nom::sequence::tuple;
 use nom::IResult;
 
-use crate::frame::components::{StationInfo, SupportedRate, ManagementInfoId};
+use crate::frame::components::{ManagementInfoId, StationInfo, SupportedRate};
 
 /// Parse variable length and variable field information.
 /// The general structure of the data looks like this:
@@ -35,8 +35,11 @@ pub fn parse_station_info(mut input: &[u8]) -> IResult<&[u8], StationInfo> {
                     // Remove null chars. Some APs seem to enjoy sending those.
                     ssid = ssid.replace('\0', " ");
                     station_info.ssid = Some(ssid);
-                },
-                ManagementInfoId::SupportedRates => station_info.supported_rates = data.iter().map(|rate| SupportedRate(*rate)).collect(),
+                }
+                ManagementInfoId::SupportedRates => {
+                    station_info.supported_rates =
+                        data.iter().map(|rate| SupportedRate(*rate)).collect()
+                }
                 _ => {
                     station_info.data.push((element, data.to_vec()));
                 }

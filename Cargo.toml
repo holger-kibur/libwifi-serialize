@@ -34,6 +34,7 @@ libwifi_macros = { version="0.0.2", path="libwifi_macros" }
 criterion = "0.3"
 doc-comment = "0.3"
 rand = "0.8"
+hex = "0.4"
 pretty-hex = "0.3"
 
 [[bench]]

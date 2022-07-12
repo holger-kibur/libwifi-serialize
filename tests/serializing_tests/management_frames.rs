@@ -1,40 +1,106 @@
-use libwifi::frame::components::{ManagementHeader, FrameControl, SequenceControl, StationInfo, SupportedRate, ManagementInfoId};
-use libwifi::frame::{Frame, Beacon};
+use crate::*;
+use libwifi::frame::components::{
+    FrameControl, ManagementHeader, ManagementInfoId, SequenceControl, StationInfo, SupportedRate,
+};
+use libwifi::frame::{Beacon, Frame};
 use libwifi::serialize_frame;
 use pretty_hex::pretty_hex;
-use crate::*;
-
 
 #[test]
-fn serialize_beacon() {
+fn serialize_beacon() -> Result<(), libwifi::error::Error> {
+    let ground_truth = hex::decode(
+        "\
+        80000000ffffffffffff14ebb6af7b67\
+        14ebb6af7b6750db8871d8df04000000\
+        64003114000e46726565626f782d3543\
+        35333345010882848b962430486c0301\
+        09050400010000230210002a01003204\
+        0c12186030140100000fac040100000f\
+        ac040100000fac020c000b0501000a00\
+        00460533000000002d1aef1917ffff00\
+        00000000000000000000000000000000\
+        000000004a0e14000a002c01c8001400\
+        050019007f080500080000000040\
+        ",
+    )
+    .expect("Couldn't decode ground truth hex!");
+
     let beacon = Frame::Beacon(Beacon {
         header: ManagementHeader {
             frame_control: FrameControl {
                 protocol_version: 0,
                 frame_type: libwifi::FrameType::Management,
                 frame_subtype: libwifi::FrameSubType::Beacon,
-                flags: 0xAA,
+                flags: 0x00,
             },
-            duration: [0xF0, 0x0D],
-            address_1: TEST_MAC_1,
-            address_2: TEST_MAC_2,
-            address_3: TEST_MAC_3,
+            duration: [0x00, 0x00],
+            address_1: MacAddress([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+            address_2: MacAddress([0x14, 0xeb, 0xb6, 0xaf, 0x7b, 0x67]),
+            address_3: MacAddress([0x14, 0xeb, 0xb6, 0xaf, 0x7b, 0x67]),
             sequence_control: SequenceControl {
-                fragment_number: 0xF1,
-                sequence_number: 0xF234,
-            }
+                fragment_number: 0,
+                sequence_number: 3509,
+            },
         },
-        timestamp: 0x0123456789ABCDEF,
-        beacon_interval: 0xBEAC,
-        capability_info: 0x2BAD,
+        timestamp: 20935373192,
+        beacon_interval: 100,
+        capability_info: 0x1431,
         station_info: StationInfo {
-            ssid: Some("My face when internet protocol".to_owned()),
-            supported_rates: vec![SupportedRate(0x0C), SupportedRate(0x12), SupportedRate(0x0C), SupportedRate(0x12)],
-            data: vec![(ManagementInfoId::TIM, vec![0, 3, 1, 0]), (ManagementInfoId::DsParameterSet, vec![9, 17])],
-        }
+            ssid: Some("Freebox-5C533E".to_owned()),
+            supported_rates: vec![
+                1000.try_into()?,
+                2000.try_into()?,
+                5500.try_into()?,
+                11000.try_into()?,
+                18000.try_into()?,
+                24000.try_into()?,
+                36000.try_into()?,
+                54000.try_into()?,
+            ],
+            data: vec![
+                (ManagementInfoId::DsParameterSet, vec![0x09]),
+                (ManagementInfoId::TIM, vec![0x00, 0x01, 0x00, 0x00]),
+                (ManagementInfoId::TpcReport, vec![0x10, 0x00]),
+                (ManagementInfoId::ErpInfo, vec![0x00]),
+                (
+                    ManagementInfoId::ExtSupportedRates,
+                    vec![0x0c, 0x12, 0x18, 0x60],
+                ),
+                (
+                    ManagementInfoId::RobustSecurityNetwork,
+                    vec![
+                        0x01, 0x00, 0x00, 0x0f, 0xac, 0x04, 0x01, 0x00, 0x00, 0x0f, 0xac, 0x04,
+                        0x01, 0x00, 0x00, 0x0f, 0xac, 0x02, 0x0c, 0x00,
+                    ],
+                ),
+                (
+                    ManagementInfoId::ObssLoadElement,
+                    vec![0x01, 0x00, 0x0a, 0x00, 0x00],
+                ),
+                (
+                    ManagementInfoId::RmEnabledCapability,
+                    vec![0x33, 0x00, 0x00, 0x00, 0x00],
+                ),
+                (
+                    ManagementInfoId::HtCapability,
+                    vec![
+                        0xef, 0x19, 0x17, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00,
+                    ],
+                ),
+            ],
+        },
     });
     let mut buffer = [0_u8; 2304];
-    let bytes_written = serialize_frame(buffer.as_mut_slice(), &beacon).expect("Couldn't serialize beacon frame!");
+    let bytes_written =
+        serialize_frame(buffer.as_mut_slice(), &beacon).expect("Couldn't serialize beacon frame!");
     let frame_raw = &buffer[..bytes_written];
     println!("{}", pretty_hex(&frame_raw));
+
+    if !compare_byte_slice(frame_raw, &ground_truth[..bytes_written]) {
+        panic!("Frame doesn't match ground truth!");
+    }
+
+    Ok(())
 }
