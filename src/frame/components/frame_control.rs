@@ -12,6 +12,27 @@ fn flag_is_set(data: u8, bit: u8) -> bool {
     }
 }
 
+#[inline]
+pub fn build_flags(
+    to_ds: bool,
+    from_ds: bool,
+    more_frags: bool,
+    retry: bool,
+    pwr_mgmt: bool,
+    more_data: bool,
+    protected: bool,
+    order: bool,
+) -> u8 {
+    ((to_ds as u8) << 7)
+        | ((from_ds as u8) << 6)
+        | ((more_frags as u8) << 5)
+        | ((retry as u8) << 4)
+        | ((pwr_mgmt as u8) << 3)
+        | ((more_data as u8) << 2)
+        | ((protected as u8) << 1)
+        | (order as u8)
+}
+
 /// The very first two bytes of every frame contain the FrameControl header.
 /// [Wikipedia article](https://en.wikipedia.org/wiki/802.11_Frame_Types)
 ///
