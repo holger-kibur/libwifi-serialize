@@ -4,7 +4,7 @@ mod mac_address;
 mod sequence_control;
 mod station_info;
 
-pub use frame_control::FrameControl;
+pub use frame_control::{FrameControl, build_flags};
 pub use header::*;
 pub use mac_address::*;
 pub use sequence_control::SequenceControl;
