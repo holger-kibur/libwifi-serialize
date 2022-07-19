@@ -7,20 +7,21 @@ use libwifi::serialize_frame;
 use pretty_hex::pretty_hex;
 
 #[test]
+/// Test against a beacon frame captured with wireshark.
 fn serialize_beacon() -> Result<(), libwifi::error::Error> {
     let ground_truth = hex::decode(
         "\
         80000000ffffffffffff14ebb6af7b67\
         14ebb6af7b6750db8871d8df04000000\
-        64003114000e46726565626f782d3543\
-        35333345010882848b962430486c0301\
-        09050400010000230210002a01003204\
-        0c12186030140100000fac040100000f\
-        ac040100000fac020c000b0501000a00\
-        00460533000000002d1aef1917ffff00\
-        00000000000000000000000000000000\
-        000000004a0e14000a002c01c8001400\
-        050019007f080500080000000040\
+        640031140007626967204d4143010882\
+        848b962430486c030109050400010000\
+        230210002a010032040c121860301401\
+        00000fac040100000fac040100000fac\
+        020c000b0501000a0000460533000000\
+        002d1aef1917ffff0000000000000000\
+        000000000000000000000000004a0e14\
+        000a002c01c8001400050019007f0805\
+        00080000000040\
         ",
     )
     .expect("Couldn't decode ground truth hex!");
@@ -46,7 +47,7 @@ fn serialize_beacon() -> Result<(), libwifi::error::Error> {
         beacon_interval: 100,
         capability_info: 0x1431,
         station_info: StationInfo {
-            ssid: Some("Freebox-5C533E".to_owned()),
+            ssid: Some("big MAC".to_owned()),
             supported_rates: vec![
                 1000.try_into()?,
                 2000.try_into()?,

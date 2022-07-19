@@ -10,7 +10,7 @@ use std::fmt;
 /// // -> true
 /// ```
 ///
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct MacAddress(pub [u8; 6]);
 
 impl MacAddress {
