@@ -84,7 +84,7 @@ impl TryFrom<u32> for SupportedRate {
         rate.map_or_else(
             || {
                 Err(Error::SerializeFailure(format!(
-                    "Can't be an 802.11 supported rate: {} Mbps!",
+                    "Can't be an 802.11 supported rate: {} kbps!",
                     value
                 )))
             },

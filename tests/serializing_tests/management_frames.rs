@@ -1,6 +1,7 @@
 use crate::*;
 use libwifi::frame::components::{
-    FrameControl, ManagementHeader, ManagementInfoId, SequenceControl, StationInfo, SupportedRate,
+    CapabilityInfo, FrameControl, ManagementHeader, ManagementInfoId, SequenceControl, StationInfo,
+    SupportedRate,
 };
 use libwifi::frame::{Beacon, Frame};
 use libwifi::serialize_frame;
@@ -26,6 +27,8 @@ fn serialize_beacon() -> Result<(), libwifi::error::Error> {
     )
     .expect("Couldn't decode ground truth hex!");
 
+    type CI = CapabilityInfo;
+
     let beacon = Frame::Beacon(Beacon {
         header: ManagementHeader {
             frame_control: FrameControl {
@@ -45,7 +48,11 @@ fn serialize_beacon() -> Result<(), libwifi::error::Error> {
         },
         timestamp: 20935373192,
         beacon_interval: 100,
-        capability_info: 0x1431,
+        capability_info: CI::ESS
+            | CI::PRIVACY
+            | CI::SHORT_PREAMBLE
+            | CI::SHORT_TIME_SLOT
+            | CI::MEASURE_RADIO,
         station_info: StationInfo {
             ssid: Some("big MAC".to_owned()),
             supported_rates: vec![

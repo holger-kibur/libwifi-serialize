@@ -19,7 +19,7 @@ pub fn gen_mgmt_header<'a>(cursor: GenCursor<'a>, mgmt_header: &ManagementHeader
     )?)
 }
 
-pub fn gen_data_header<'a>(cursor: GenCursor<'a>, data_header: &DataHeader) -> GenResult<'a> {
+pub fn _gen_data_header<'a>(cursor: GenCursor<'a>, data_header: &DataHeader) -> GenResult<'a> {
     Ok(do_gen!(
         cursor,
         gen_frame_control(&data_header.frame_control)

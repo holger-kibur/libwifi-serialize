@@ -2,7 +2,7 @@ use nom::number::complete::{le_u16, le_u64};
 use nom::sequence::tuple;
 
 use crate::error::Error;
-use crate::frame::components::FrameControl;
+use crate::frame::components::{CapabilityInfo, FrameControl};
 use crate::frame::*;
 use crate::parsers::{parse_management_header, parse_station_info};
 
@@ -63,14 +63,14 @@ pub fn parse_association_response(
 /// - Dynamic fields
 pub fn parse_beacon(frame_control: FrameControl, input: &[u8]) -> Result<Frame, Error> {
     let (input, header) = parse_management_header(frame_control, input)?;
-    let (_, (timestamp, beacon_interval, capability_info, station_info)) =
+    let (_, (timestamp, beacon_interval, capability_info_raw, station_info)) =
         tuple((le_u64, le_u16, le_u16, parse_station_info))(input)?;
 
     Ok(Frame::Beacon(Beacon {
         header,
         timestamp,
         beacon_interval,
-        capability_info,
+        capability_info: CapabilityInfo::from_bits_truncate(capability_info_raw),
         station_info,
     }))
 }

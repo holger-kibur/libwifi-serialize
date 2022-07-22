@@ -12,7 +12,7 @@ pub fn gen_beacon<'a>(cursor: GenCursor<'a>, frame: &Beacon) -> GenResult<'a> {
         gen_mgmt_header(&frame.header)
             >> gen_le_u64!(frame.timestamp)
             >> gen_le_u16!(frame.beacon_interval)
-            >> gen_le_u16!(frame.capability_info)
+            >> gen_le_u16!(frame.capability_info.bits())
             >> gen_station_info(&frame.station_info)
     )
 }
